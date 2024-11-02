@@ -1,8 +1,8 @@
 const http = require('http');
 const fs =  require('fs');
 const url = require('url');
-const myServer = http.createServer((req,res) =>{
-     if(req.url === "/favicon.ico") return res.end();
+function myHandler (req,res){
+    if(req.url === "/favicon.ico") return res.end();
     const log = `${Date.now()} : ${req.method} ${req.url} New Request recieved \n`
     const myUrl =url.parse(req.url,true);
     //console.log(myUrl,true);
@@ -33,12 +33,14 @@ const myServer = http.createServer((req,res) =>{
                 res.end ("404 not found")
 
         }
-    })
-    //console.log(req);
+    });
+}
+const myServer = http.createServer(myHandler);
+    console.log(req);
     
     
-});
+
 
 myServer.listen(8000,() =>{
     console.log("server is running on port 8000");
-})
+});
