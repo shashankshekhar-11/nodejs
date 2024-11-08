@@ -1,6 +1,15 @@
-1730564281695 : GET / New Request recieved 
-1730564288566 : GET /about New Request recieved 
-1730564436660 : GET /signUp New Request recieved 
-1730567663857 : GET /signUp New Request recieved 
-1730567888807 : GET / New Request recieved 
-1730567896688 : GET /about New Request recieved 
+1730902648256:GET: /api/users
+
+1730918394025:::1:GET: /
+
+1730918402189:::1:GET: /api/users/1
+
+1730918465026:::1:POST: /api/users
+
+1730918490579:::1:GET: /api/users
+
+1730918498104:::1:POST: /api/users
+
+1730918589680:::1:POST: /api/users
+
+1730918980450:::1:POST: /api/users

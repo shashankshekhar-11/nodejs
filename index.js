@@ -1,67 +1,104 @@
-const http = require('http');
-//const fs =  require('fs');
-//const url = require('url');
 const express = require("express");
+const mongoose = require("mongoose")
+const users =require("./MOCK_DATA.json");
+const fs =require("fs");
+const app=express();
+const PORT = 8000;
 
-const app = express();
+//connection
+mongoose
+.connect("mongodb://127.0.0.1:27017/youtube-app-1")
+.then(() => console.log("Connected to MongoDB"))
+.catch(err => console.log("Mongo Error",err))
 
-app.get("/",(req,res) =>{
-    return res.send("Hello from Homepage" );
+//schema
+const usersSchema =new mongoose.Schema({
+    firstName :{
+        type:String,
+        required :true,
+    },
+    lastName :{
+        type:String,
+        required :false,
+    },
+    email:{
+        type:String,
+        required:true, 
+        unique: true,
+    },
+    jobTitle :{
+        type:String,
+    },
+    gender :{
+        type :String,
+    },
 });
 
-app.get("/about",(req,res) =>{
-    return res.send(`Hello from About Page
-        from ${req.query.name}
-        age: ${req.query.age}`
+const User = mongoose.model("user", usersSchema);
 
-    );
+// Middleware to parse JSON bodies
+app.use(express.json({extended :false}));
+app.use(express.urlencoded({extended:false}));
+
+//middleware 
+app.use((req,res,next)=>{
+    fs.appendFile('log.txt',`\n${Date.now()}:${req.ip}:${req.method}: ${req.path}\n`,(err,data)=>{
+        next();
+    })
+    // next();
 })
 
-// function myHandler (req,res){
-//     if(req.url === "/favicon.ico") return res.end();
-//     const log = `${Date.now()} : ${req.method} ${req.url} New Request recieved \n`
-//     const myUrl =url.parse(req.url,true);
-//     //console.log(myUrl,true);
-    
-//     fs.appendFile('log.txt', log, (err,data) =>{
-//         switch(myUrl.pathname){
-//             case "/":
-//                 res.end("HomePage");
-//                 break;
-//             case "/about":
-//                 const userName = myUrl.query.myName;
-//                 res.end(`Hi, ${userName}`);
-//                 break;
-//             case "/search" :
-//                 const searchQuery = myUrl.query.searchQuery;
-//                 //console.log(searchQuery);
-//                 res.end(`Your search result for ${searchQuery}`)
-//             case "/contact":
-//                 res.end("Contact Page");
-//                 break;
-//             case "/signUp":
-//                 if(req.method == 'GET') res.end("This is a signUp form");
-//                 else if(req.method == 'POST'){
-//                     // DB Query
-//                     res.end("Sign Up Successfull");
-                    
-//                 }
-//                 break;
-//             default:
-//                 res.end ("404 not found");
-//                 break;
+// app.use((req,res,next)=>{
+//     console.log("Hello from middleware 2");
+//     return res.end({msg:"Hello from Middleware 2"})
+//     next();
+// })
+//Routes
+app.get("/api/users",(req,res)=>{
+    //console.log("I am in get route ",req.myUsername);
+    res.setHeader("X-MyName","Shashank Shekhar");//custom header
+    //Always add X to custom headers
+    return res.json(users);
+});
 
-//         }
-//     });
-// }
-// const myServer = http.createServer(app);
+app.get("/users",(req,res) => {
+    const html =`
+        <ul>
+            ${users.map((user) => `<li>${user.first_name }</li>`).join("")}
+        </ul>
+    `;
+    res.send(html);
+});
+
+app.route("/api/users/:id")
+.get((req,res) => {
+    const id = Number(req.params.id)
+    const user = users.find((user) => user.id === id);
+    if(!user) return res.status(404).json({error:"user not found"})
+    return res.json(user);
+}).post((req,res)=>{ 
+     //TODO :create new user
+   return res.json({status:"pending"})
+}).patch((req,res) =>{
+    //TODO :update new user
+     return res.json({status:"pending"})
+}).delete((req,res)=>{
+    //TODO :delete new user
+    return res.json({status:"pending"})
+})
+
+app.post("/api/users",(req,res) =>{
    
+    const body =req.body;
+    //console.log(body);
+    if(!body || !body.first_name || !body.last_name || !body.email || !body.job_title || !body.gender){
+        return res.status(400).json({error:"Invalid request body"})
+    }
+    users.push({...body,id:users.length+1});
+    fs.writeFile('./MOCK_DATA.json',JSON.stringify(users),(err,data)=>{
+        return res.status(201).json({status:"sucess",id:users.length});
+    });
+   
+})
 
-
-
-// myServer.listen(8000,() =>{
-//     console.log("server is running on port 8000");
-// });
-
-app.listen(8000,()=> console.log( "server is running on port 8000"));
-
+app.listen(PORT,() => console.log(`Port started with port ${PORT}`));

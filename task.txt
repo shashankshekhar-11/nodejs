@@ -1,0 +1,12 @@
+REST-API
+
+GET/users -list all users(HTML);
+
+GET/api/users -list all users(JSON);
+
+GET//api/users/:id - get user by id;
+
+POST//api/users - Create new users
+PATCHT//api/users/1 - Edit users with id1;
+
+DELETE//api/users/1 - DELETE users with id1;
